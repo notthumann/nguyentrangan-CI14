@@ -8,27 +8,10 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class GamePanel extends JPanel {
-    Background background;
-    Player player;
-    static ArrayList<PlayerBullet> bullets; //TODO: continue editing
 
     public GamePanel() {
-        this.background = new Background();
-        this.player = new Player();
-        this.bullets = new ArrayList<>();
-//        this.bullets.add();
-//        this.bullets.size();
-//        this.bullets.get();
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        this.background.render(g);
-        this.player.render(g);
-        for(int i = 0; i < this.bullets.size(); i++){
-            PlayerBullet bullet = this.bullets.get(i);
-            bullet.render(g);
-        }
+        new Background();
+        new Player();
     }
 
     public void gameLoop() {
@@ -45,15 +28,15 @@ public class GamePanel extends JPanel {
     }
 
     public void runAll() {
-        this.background.run();
-        this.player.run();
-        for (int i = 0; i < bullets.size(); i ++){
-            PlayerBullet bullet = this.bullets.get(i);
-            bullet.run();
-        }
+        GameObject.runAll();
     }
 
     public void renderAll() {
         this.repaint(); // ~ paint()
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        GameObject.renderAll(g);
     }
 }

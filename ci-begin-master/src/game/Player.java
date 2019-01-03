@@ -5,69 +5,83 @@ import tklibs.SpriteUtils;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Player {
-    BufferedImage image;
-    Vector2D position;
+public class Player extends GameObject{
+    Sphere sphereLeft;
+    Sphere sphereRight;
 
-    public Player(){
+    public Player() {
+        super();
         this.image = SpriteUtils.loadImage("assets/images/players/straight/0.png");
-        this.position = new Vector2D(200, 400);
+        this.position.set(200, 400);
+        this.sphereLeft = new Sphere();
+        this.sphereRight = new Sphere();
+        this.updateSpherePosition();
     }
 
-    public void render(Graphics g) {
-        g.drawImage(this.image,(int) this.position.x, (int) this.position.y, null);
-
-
-    }
-    public void run(){
+    @Override
+    public void run() {
+        super.run();
         this.move();
         this.limitPosition();
         this.fire();
-
-
+        this.updateSpherePosition();
     }
 
-    int count;
+    private void updateSpherePosition() {
+        this.sphereLeft.position.set(this.position)
+                    .add(-20, 30);
+        this.sphereRight.position.set(this.position)
+                    .add(30, 30);
+    }
 
+    int count; // TODO: continue editing
     private void fire() {
-        count ++;
-        if (count > 20) {
-            if (GameWindow.isFirePress) {
-                PlayerBullet bullet = new PlayerBullet();
-                bullet.position = new Vector2D(this.position.x,this.position.y);
-                GamePanel.bullets.add(bullet);
-                this.count = 0;
+        count++;
+        if(count > 20) {
+            if(GameWindow.isFirePress) {
+                float startAngle =  -(float)Math.PI / 4;
+                float endAngle = -3 * (float)Math.PI / 4;
+                float offset = (endAngle - startAngle) / 4;
+                for (int i = 0; i < 5; i++) {
+                    PlayerBullet bullet = new PlayerBullet();
+                    bullet.position.set(this.position.x - 15, this.position.y);
+                    bullet.velocity.setAngle(startAngle + offset * i);
+                    this.count = 0;
+                }
             }
         }
     }
 
     private void limitPosition() {
-        if(this.position.y<0){
-            this.position.y = 0;
+        if (this.position.y < 0) {
+            this.position.set(this.position.x, 0);
         }
-        if(this.position.y > 600 - this.image.getHeight()){
-            this.position.y = 600 - this.image.getHeight();
+        if (this.position.y > 600 - this.image.getHeight()) {
+            this.position.set(this.position.x, 600 - this.image.getHeight());
         }
-        if(this.position.x < 0 ){
-            this.position.x = 0;
+        if (this.position.x < 0) {
+            this.position.set(0, this.position.y);
         }
-        if(this.position.x > 384 - this.image.getWidth() ){
-            this.position.x = 384 - this.image.getWidth();
+        if (this.position.x > 384 - this.image.getWidth()) {
+            this.position.set(384 - this.image.getWidth(), this.position.y);
         }
     }
 
     private void move() {
-        if(GameWindow.isUpPress){
-            this.position.substract(0,5);
+        float vX = 0;
+        float vY = 0;
+        if (GameWindow.isUpPress) {
+            vY = -5;
         }
-        if(GameWindow.isDownPress){
-            this.position.add(0 ,5 );
+        if (GameWindow.isDownPress) {
+            vY = 5;
         }
-        if(GameWindow.isRightPress){
-            this.position.add ( 5 , 0);
+        if (GameWindow.isLeftPress) {
+            vX = -5;
         }
-        if(GameWindow.isLeftPress){
-            this.position.substract(5 , 0);
+        if (GameWindow.isRightPress) {
+            vX = 5;
         }
+        this.velocity.set(vX, vY).setLength(5);
     }
 }
