@@ -27,10 +27,12 @@ public class Sphere extends GameObject {
     int count; //TODO: continue editing
     private void fire() {
         this.count++;
-        if(this.count > 20) {
-            SphereBullet bullet = new SphereBullet();
-            bullet.position.set(this.position);
-            this.count = 0;
+        if(this.isActive) {
+            if (this.count > 20) {
+                SphereBullet bullet = new SphereBullet();
+                bullet.position.set(this.position);
+                this.count = 0;
+            }
         }
     }
 

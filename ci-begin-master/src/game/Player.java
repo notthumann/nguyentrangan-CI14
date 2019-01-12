@@ -1,5 +1,8 @@
 package game;
 
+import game.Enemy.EnemyBullet;
+import game.Physic.BoxCollider;
+import game.Physic.Physics;
 import game.RenderR.Animation;
 import game.RenderR.SingleImageRenderer;
 import tklibs.SpriteUtils;
@@ -8,10 +11,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Player extends GameObject{
+public class Player extends GameObject implements Physics {
     Sphere sphereLeft;
     Sphere sphereRight;
-
+    BoxCollider boxCollider;
+    FrameCounter fireCounter;
     public Player() {
         super();
         ArrayList<BufferedImage> images = new ArrayList<>();
@@ -27,15 +31,19 @@ public class Player extends GameObject{
         this.sphereLeft = new Sphere();
         this.sphereRight = new Sphere();
         this.updateSpherePosition();
+        this.boxCollider = new BoxCollider(this.position,32,48);
+        this.fireCounter = new FrameCounter(20);
     }
 
     @Override
     public void run() {
+        if(this.isActive){
         super.run();
         this.move();
         this.limitPosition();
         this.fire();
         this.updateSpherePosition();
+        this.takeDamage();}
     }
 
     private void updateSpherePosition() {
@@ -45,10 +53,8 @@ public class Player extends GameObject{
                     .add(30, 30);
     }
 
-    int count; // TODO: continue editing
     private void fire() {
-        count++;
-        if(count > 20) {
+        if(fireCounter.run()) {
             if(GameWindow.isFirePress) {
                 float startAngle =  -(float)Math.PI / 4;
                 float endAngle = -3 * (float)Math.PI / 4;
@@ -57,8 +63,11 @@ public class Player extends GameObject{
                     PlayerBullet bullet = new PlayerBullet();
                     bullet.position.set(this.position.x - 15, this.position.y);
                     bullet.velocity.setAngle(startAngle + offset * i);
-                    this.count = 0;
+                    this.fireCounter.reset();
                 }
+//                PlayerBullet bullet = new PlayerBullet();
+//                bullet.position.set(this.position);
+//                this.count = 0;
             }
         }
     }
@@ -94,5 +103,25 @@ public class Player extends GameObject{
             vX = 5;
         }
         this.velocity.set(vX, vY).setLength(5);
+    }
+    int HP = 3;
+    public void takeDamage() {
+        EnemyBullet enemyBullet = GameObject.findIntersected(EnemyBullet.class, this.boxCollider);
+        if (enemyBullet != null) {
+//            System.out.println("hit");
+            enemyBullet.deactive();
+            HP = HP-1;
+            System.out.println(HP);
+        }
+        if(HP == 0){
+            this.deactive();
+            sphereLeft.deactive();
+            sphereRight.deactive();
+
+        }
+    }
+    @Override
+    public BoxCollider getBoxColider() {
+        return this.boxCollider;
     }
 }
